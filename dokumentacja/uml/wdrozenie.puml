@@ -1,0 +1,23 @@
+@startuml wdrozenie
+skinparam shadowing false
+
+node "Komputer użytkownika" {
+  artifact "Przeglądarka" as Browser
+}
+
+node "Docker" {
+  node "kontener web" {
+    artifact "obraz Python 3.12" as Image
+    component "Flask :5000" as Flask
+  }
+  node "kontener db" {
+    database "MySQL 8.4\ndental_clinic" as Mysql
+  }
+  folder "wolumen mysql_data" as Volume
+}
+
+Browser --> Flask : HTTP :5000
+Flask --> Mysql : TCP :3306\nsieć Dockera
+Mysql --> Volume : pliki bazy
+
+@enduml

@@ -1,0 +1,52 @@
+@startuml komponenty
+skinparam componentStyle uml2
+
+actor "Użytkownik" as User
+
+package "Przeglądarka" {
+  [HTML i CSS] as Html
+  [booking.js] as Js
+}
+
+package "Aplikacja Flask" {
+  [Widok Jinja2] as View
+  package "Kontrolery" {
+    [auth] as Auth
+    [treatments] as Treatments
+    [dentists] as Dentists
+    [appointments] as Appointments
+    [users] as Users
+  }
+  [booking.py] as Booking
+  [scheduling.py] as Scheduling
+  [Model SQLAlchemy] as Model
+}
+
+database "MySQL" as Db
+
+User --> Html
+Html --> Js
+Html --> Auth : formularze
+Html --> Treatments
+Html --> Dentists
+Html --> Appointments : POST /appointments
+Html --> Users
+Js --> Appointments : GET /api/dentists\nGET /api/slots
+
+Auth --> Model
+Treatments --> Model
+Dentists --> Model
+Users --> Model
+Appointments --> Booking
+Booking --> Scheduling
+Booking --> Model
+Scheduling --> Model
+
+Auth --> View
+Treatments --> View
+Dentists --> View
+Appointments --> View
+Users --> View
+Model --> Db
+
+@enduml

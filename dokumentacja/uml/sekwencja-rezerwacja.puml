@@ -1,0 +1,46 @@
+@startuml sekwencja-rezerwacja
+actor Pacjent
+participant "Przeglądarka" as Browser
+participant "booking.js" as Js
+participant "Kontroler wizyt" as Controller
+participant "booking.py" as Booking
+participant "scheduling.py" as Scheduling
+database "MySQL" as Db
+
+Pacjent -> Browser : wybór zabiegu
+Browser -> Js : change treatment
+Js -> Controller : GET /api/dentists?treatment_id
+Controller -> Db : dentyści z uprawnieniem
+Db --> Controller : lista
+Controller --> Js : JSON
+Js --> Browser : lista dentystów
+
+Pacjent -> Browser : dentysta i data
+Browser -> Js : change
+Js -> Controller : GET /api/slots
+Controller -> Db : grafik dentysty i wizyty blokujące
+Db --> Controller : wiersze
+Controller -> Scheduling : candidate_starts\navailable_slots
+Scheduling --> Controller : wolne godziny i gabinety
+Controller --> Js : JSON
+Js --> Browser : lista godzin
+
+Pacjent -> Browser : Zarezerwuj
+Browser -> Controller : POST /appointments
+Controller -> Booking : reserve_appointment
+
+alt termin poprawny
+  Booking -> Db : blokada dentysty, pacjenta i gabinetów
+  Booking -> Scheduling : kolizja przedziałów
+  Scheduling --> Booking : wynik porównania
+  Booking -> Db : odczyt nachodzących wizyt
+  Booking -> Db : INSERT wizyty\ngabinet o najniższym id
+  Db --> Booking : rekord
+  Booking --> Controller : wizyta
+  Controller --> Browser : przekierowanie na listę wizyt
+else błąd walidacji albo kolizja
+  Booking --> Controller : lista błędów
+  Controller --> Browser : formularz z komunikatem
+end
+
+@enduml

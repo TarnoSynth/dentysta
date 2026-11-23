@@ -1,0 +1,72 @@
+@startuml klasy
+skinparam classAttributeIconSize 0
+skinparam classFontName Segoe UI
+hide circle
+
+class User {
+  +id : int
+  +email : string
+  +password_hash : string
+  +first_name : string
+  +last_name : string
+  +phone : string
+  +role : string
+  +is_active : bool
+  +created_at : datetime
+  +full_name() : string
+}
+
+class Treatment {
+  +id : int
+  +name : string
+  +description : string
+  +duration_minutes : int
+  +price : decimal
+  +is_active : bool
+}
+
+class Dentist {
+  +id : int
+  +first_name : string
+  +last_name : string
+  +is_active : bool
+  +full_name() : string
+}
+
+class Room {
+  +id : int
+  +name : string
+  +is_active : bool
+}
+
+class DentistSchedule {
+  +id : int
+  +dentist_id : int
+  +weekday : int
+  +start_time : time
+  +end_time : time
+}
+
+class Appointment {
+  +id : int
+  +patient_id : int
+  +dentist_id : int
+  +treatment_id : int
+  +room_id : int
+  +starts_at : datetime
+  +ends_at : datetime
+  +duration_minutes : int
+  +price : decimal
+  +status : string
+  +created_at : datetime
+  +{static} overlapping(start, end, ignore_id, lock) : Appointment[*]
+}
+
+User "1" --> "*" Appointment : pacjent
+Dentist "*" --> "*" Treatment : dentist_treatments
+Dentist "1" --> "*" DentistSchedule
+Dentist "1" --> "*" Appointment
+Treatment "1" --> "*" Appointment
+Room "1" --> "*" Appointment
+
+@enduml
