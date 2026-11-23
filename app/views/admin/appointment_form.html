@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block title %}Edycja wizyty{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Wizyta {{ appointment.patient.full_name }}</h1>
+    <p>
+      {{ format_date(appointment.starts_at) }}
+      {{ format_time(appointment.starts_at) }}–{{ format_time(appointment.ends_at) }},
+      {{ appointment.treatment.name }},
+      {{ appointment.dentist.full_name }},
+      {{ appointment.room.name }}.
+      Status: <span class="badge badge-{{ appointment.status }}">{{ status_labels[appointment.status] }}</span>
+    </p>
+    {% include "partials/errors.html" %}
+
+    <h2>Status</h2>
+    <form method="post" class="filters">
+      {% include "partials/csrf.html" %}
+      <input type="hidden" name="action" value="status">
+      <div>
+        <label for="status">Nowy status</label>
+        <select id="status" name="status">
+          {% for value, label in status_labels.items() %}
+            <option value="{{ value }}" {% if appointment.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit">Zapisz status</button>
+    </form>
+
+    <h2>Zmiana terminu</h2>
+    <form
+      method="post"
+      class="stack"
+      data-booking
+      data-ignore-id="{{ appointment.id }}"
+      data-patient-id="{{ appointment.patient_id }}"
+    >
+      {% include "partials/csrf.html" %}
+      <input type="hidden" name="action" value="reschedule">
+      <label for="treatment_id">Zabieg</label>
+      <select id="treatment_id" name="treatment_id" required>
+        <option value="">Wybierz zabieg</option>
+        {% for treatment in treatments %}
+          <option value="{{ treatment.id }}" {% if treatment.id|string == selected.treatment_id|string %}selected{% endif %}>
+            {{ treatment.name }} · {{ treatment.duration_minutes }} min
+          </option>
+        {% endfor %}
+      </select>
+      <label for="dentist_id">Dentysta</label>
+      <select id="dentist_id" name="dentist_id" required>
+        <option value="">Wybierz dentystę</option>
+        {% for dentist in dentists %}
+          <option value="{{ dentist.id }}" {% if dentist.id|string == selected.dentist_id|string %}selected{% endif %}>{{ dentist.full_name }}</option>
+        {% endfor %}
+      </select>
+      <label for="visit_date">Data</label>
+      <input id="visit_date" name="visit_date" type="date" min="{{ today }}" value="{{ selected.visit_date }}" required>
+      <label for="start_time">Godzina</label>
+      <select id="start_time" name="start_time" required>
+        <option value="">Wybierz godzinę</option>
+        {% for slot in slots %}
+          {% set label = slot.start.strftime('%H:%M') %}
+          <option value="{{ label }}" {% if label == selected.start_time %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label for="room_id">Gabinet</label>
+      <select id="room_id" name="room_id" required>
+        <option value="">Wybierz gabinet</option>
+        {% for slot in slots %}
+          {% if slot.start.strftime('%H:%M') == selected.start_time %}
+            {% for room in slot.rooms %}
+              <option value="{{ room.id }}" {% if room.id|string == selected.room_id|string %}selected{% endif %}>{{ room.name }}</option>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </select>
+      <p class="hint" data-slot-hint></p>
+      <div class="actions">
+        <button type="submit">Zapisz nowy termin</button>
+        <a class="button button-ghost" href="{{ url_for('appointments.admin_list') }}">Wróć do listy</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

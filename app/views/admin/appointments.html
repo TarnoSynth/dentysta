@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block title %}Wizyty{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Wizyty</h1>
+    </div>
+  </div>
+  <form method="get" class="filters">
+    <div>
+      <label for="date">Data</label>
+      <input id="date" name="date" type="date" value="{{ filters.date }}">
+    </div>
+    <div>
+      <label for="dentist_id">Dentysta</label>
+      <select id="dentist_id" name="dentist_id">
+        <option value="">Wszyscy</option>
+        {% for dentist in dentists %}
+          <option value="{{ dentist.id }}" {% if dentist.id|string == filters.dentist_id|string %}selected{% endif %}>{{ dentist.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="patient_id">Pacjent</label>
+      <select id="patient_id" name="patient_id">
+        <option value="">Wszyscy</option>
+        {% for patient in patients %}
+          <option value="{{ patient.id }}" {% if patient.id|string == filters.patient_id|string %}selected{% endif %}>{{ patient.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit">Filtruj</button>
+    <a class="button button-ghost" href="{{ url_for('appointments.admin_list') }}">Wyczyść</a>
+  </form>
+
+  {% if appointments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Termin</th>
+            <th>Pacjent</th>
+            <th>Dentysta</th>
+            <th>Zabieg</th>
+            <th>Gabinet</th>
+            <th>Status</th>
+            <th>Cena</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appointment in appointments %}
+            <tr>
+              <td>{{ format_date(appointment.starts_at) }} {{ format_time(appointment.starts_at) }}–{{ format_time(appointment.ends_at) }}</td>
+              <td>{{ appointment.patient.full_name }}</td>
+              <td>{{ appointment.dentist.full_name }}</td>
+              <td>{{ appointment.treatment.name }}</td>
+              <td>{{ appointment.room.name }}</td>
+              <td><span class="badge badge-{{ appointment.status }}">{{ status_labels[appointment.status] }}</span></td>
+              <td>{{ format_price(appointment.price) }}</td>
+              <td><a href="{{ url_for('appointments.admin_edit', appointment_id=appointment.id) }}">Zmień</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Brak wizyt dla wybranych filtrów.</p>
+  {% endif %}
+{% endblock %}

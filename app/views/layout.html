@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Przychodnia{% endblock %} · Przychodnia Dentystyczna</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="{{ url_for('auth.home') }}">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>
+          <strong>Przychodnia Dentystyczna</strong>
+        </span>
+      </a>
+      <nav class="nav">
+        {% if current_user %}
+          {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('treatments.admin_list') }}">Zabiegi</a>
+            <a href="{{ url_for('dentists.admin_list') }}">Dentyści</a>
+            <a href="{{ url_for('appointments.admin_list') }}">Wizyty</a>
+            <a href="{{ url_for('users.admin_list') }}">Konta</a>
+          {% else %}
+            <a href="{{ url_for('treatments.catalog') }}">Zabiegi</a>
+            <a href="{{ url_for('appointments.book') }}">Umów wizytę</a>
+            <a href="{{ url_for('appointments.mine') }}">Moje wizyty</a>
+          {% endif %}
+          <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
+            {% include "partials/csrf.html" %}
+            <button type="submit" class="linkish">Wyloguj</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Logowanie</a>
+          <a href="{{ url_for('auth.register') }}">Rejestracja</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    {% include "partials/flashes.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

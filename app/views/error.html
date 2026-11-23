@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+  <section class="panel narrow">
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <a class="button" href="{{ url_for('auth.home') }}">Wróć na start</a>
+  </section>
+{% endblock %}

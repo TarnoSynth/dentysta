@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edycja dentysty' if dentist else 'Nowy dentysta' }}{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>{{ 'Edycja dentysty' if dentist else 'Nowy dentysta' }}</h1>
+    {% include "partials/errors.html" %}
+    <form method="post" class="stack">
+      {% include "partials/csrf.html" %}
+      <div class="split">
+        <div>
+          <label for="first_name">Imię</label>
+          <input id="first_name" name="first_name" value="{{ form.first_name }}" required maxlength="100">
+        </div>
+        <div>
+          <label for="last_name">Nazwisko</label>
+          <input id="last_name" name="last_name" value="{{ form.last_name }}" required maxlength="100">
+        </div>
+      </div>
+      <fieldset>
+        <legend>Uprawnienia do zabiegów</legend>
+        <div class="checks">
+          {% for treatment in treatments %}
+            <label class="check">
+              <input type="checkbox" name="treatment_ids" value="{{ treatment.id }}" {% if treatment.id in form.treatment_ids %}checked{% endif %}>
+              {{ treatment.name }}{% if not treatment.is_active %} (nieaktywny){% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Grafik tygodnia</legend>
+        <div class="table-wrap">
+          <table class="schedule">
+            <thead>
+              <tr>
+                <th>Dzień</th>
+                <th>Od</th>
+                <th>Do</th>
+                <th>Drugi od</th>
+                <th>Drugi do</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for day in range(7) %}
+                <tr>
+                  <th scope="row">{{ weekdays[day] }}</th>
+                  <td><input type="time" name="start_{{ day }}_1" step="1800" value="{{ form.intervals[day][0][0] }}"></td>
+                  <td><input type="time" name="end_{{ day }}_1" step="1800" value="{{ form.intervals[day][0][1] }}"></td>
+                  <td><input type="time" name="start_{{ day }}_2" step="1800" value="{{ form.intervals[day][1][0] }}"></td>
+                  <td><input type="time" name="end_{{ day }}_2" step="1800" value="{{ form.intervals[day][1][1] }}"></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+      <label class="check">
+        <input type="checkbox" name="is_active" value="1" {% if form.is_active %}checked{% endif %}>
+        Aktywny
+      </label>
+      <div class="actions">
+        <button type="submit">Zapisz dentystę</button>
+        <a class="button button-ghost" href="{{ url_for('dentists.admin_list') }}">Wróć</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block title %}Moje wizyty{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Moje wizyty</h1>
+    </div>
+    <a class="button" href="{{ url_for('appointments.book') }}">Umów wizytę</a>
+  </div>
+
+  <h2>Nadchodzące</h2>
+  {% if upcoming %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Termin</th>
+            <th>Zabieg</th>
+            <th>Dentysta</th>
+            <th>Gabinet</th>
+            <th>Cena</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appointment in upcoming %}
+            <tr>
+              <td>{{ format_date(appointment.starts_at) }} {{ format_time(appointment.starts_at) }}–{{ format_time(appointment.ends_at) }}</td>
+              <td>{{ appointment.treatment.name }}</td>
+              <td>{{ appointment.dentist.full_name }}</td>
+              <td>{{ appointment.room.name }}</td>
+              <td>{{ format_price(appointment.price) }}</td>
+              <td>
+                <form method="post" action="{{ url_for('appointments.cancel', appointment_id=appointment.id) }}" onsubmit="return confirm('Odwołać tę wizytę?');">
+                  {% include "partials/csrf.html" %}
+                  <button type="submit" class="linkish">Odwołaj</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Nie masz zaplanowanych wizyt.</p>
+  {% endif %}
+
+  <h2>Minione</h2>
+  {% if past %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Termin</th>
+            <th>Zabieg</th>
+            <th>Dentysta</th>
+            <th>Gabinet</th>
+            <th>Status</th>
+            <th>Cena</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appointment in past %}
+            <tr>
+              <td>{{ format_date(appointment.starts_at) }} {{ format_time(appointment.starts_at) }}–{{ format_time(appointment.ends_at) }}</td>
+              <td>{{ appointment.treatment.name }}</td>
+              <td>{{ appointment.dentist.full_name }}</td>
+              <td>{{ appointment.room.name }}</td>
+              <td><span class="badge badge-{{ appointment.status }}">{{ status_labels[appointment.status] }}</span></td>
+              <td>{{ format_price(appointment.price) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Historia wizyt jest pusta.</p>
+  {% endif %}
+{% endblock %}

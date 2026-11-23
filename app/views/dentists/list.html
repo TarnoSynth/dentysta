@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block title %}Dentyści{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Dentyści</h1>
+    </div>
+    <a class="button" href="{{ url_for('dentists.create') }}">Nowy dentysta</a>
+  </div>
+  {% if dentists %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dentysta</th>
+            <th>Zabiegi</th>
+            <th>Grafik</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dentist in dentists %}
+            <tr>
+              <td><strong>{{ dentist.full_name }}</strong></td>
+              <td>{{ dentist.treatments|map(attribute='name')|join(', ') or '—' }}</td>
+              <td>
+                {% if dentist.schedules %}
+                  <ul class="compact">
+                    {% for row in dentist.schedules|sort(attribute='weekday') %}
+                      <li>{{ weekday_labels[row.weekday] }} {{ format_time(row.start_time) }}–{{ format_time(row.end_time) }}</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td><span class="badge {{ 'badge-on' if dentist.is_active else 'badge-off' }}">{{ 'Aktywny' if dentist.is_active else 'Nieaktywny' }}</span></td>
+              <td class="actions-cell">
+                <a href="{{ url_for('dentists.edit', dentist_id=dentist.id) }}">Edytuj</a>
+                <form method="post" action="{{ url_for('dentists.toggle', dentist_id=dentist.id) }}" class="inline-form">
+                  {% include "partials/csrf.html" %}
+                  <button type="submit" class="linkish">{{ 'Dezaktywuj' if dentist.is_active else 'Aktywuj' }}</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Brak dentystów.</p>
+  {% endif %}
+{% endblock %}

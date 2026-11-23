@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Zabiegi{% endblock %}
+{% block content %}
+  {% set can_book = (not manage) and current_user.role == 'patient' %}
+  <div class="page-head">
+    <div>
+      <h1>{% if manage %}Zabiegi{% else %}Dostępne zabiegi{% endif %}</h1>
+    </div>
+    {% if manage %}
+      <a class="button" href="{{ url_for('treatments.create') }}">Nowy zabieg</a>
+    {% endif %}
+  </div>
+  {% if treatments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Zabieg</th>
+            <th>Czas</th>
+            <th>Cena</th>
+            {% if manage %}<th>Status</th><th></th>{% elif can_book %}<th></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for treatment in treatments %}
+            <tr>
+              <td>
+                <strong>{{ treatment.name }}</strong>
+                {% if treatment.description %}<div class="muted">{{ treatment.description }}</div>{% endif %}
+              </td>
+              <td>{{ treatment.duration_minutes }} min</td>
+              <td>{{ format_price(treatment.price) }}</td>
+              {% if manage %}
+                <td><span class="badge {{ 'badge-on' if treatment.is_active else 'badge-off' }}">{{ 'Aktywny' if treatment.is_active else 'Nieaktywny' }}</span></td>
+                <td class="actions-cell">
+                  <a href="{{ url_for('treatments.edit', treatment_id=treatment.id) }}">Edytuj</a>
+                  <form method="post" action="{{ url_for('treatments.toggle', treatment_id=treatment.id) }}" class="inline-form">
+                    {% include "partials/csrf.html" %}
+                    <button type="submit" class="linkish">{{ 'Dezaktywuj' if treatment.is_active else 'Aktywuj' }}</button>
+                  </form>
+                </td>
+              {% elif can_book %}
+                <td><a href="{{ url_for('appointments.book', treatment_id=treatment.id) }}">Umów</a></td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">Brak zabiegów do wyświetlenia.</p>
+  {% endif %}
+{% endblock %}

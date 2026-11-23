@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Start{% endblock %}
+{% block content %}
+  <section class="hero">
+    <h1>Wybierz zabieg, dentystę i wolną godzinę.</h1>
+    <div class="actions">
+      {% if current_user and current_user.role == 'patient' %}
+        <a class="button" href="{{ url_for('appointments.book') }}">Umów wizytę</a>
+        <a class="button button-ghost" href="{{ url_for('appointments.mine') }}">Moje wizyty</a>
+      {% elif current_user and current_user.role == 'admin' %}
+        <a class="button" href="{{ url_for('appointments.admin_list') }}">Grafik wizyt</a>
+        <a class="button button-ghost" href="{{ url_for('dentists.admin_list') }}">Dentyści</a>
+      {% else %}
+        <a class="button" href="{{ url_for('auth.register') }}">Załóż konto pacjenta</a>
+        <a class="button button-ghost" href="{{ url_for('auth.login') }}">Zaloguj się</a>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

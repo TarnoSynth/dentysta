@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Edycja zabiegu' if treatment else 'Nowy zabieg' }}{% endblock %}
+{% block content %}
+  <section class="panel narrow">
+    <h1>{{ 'Edycja zabiegu' if treatment else 'Nowy zabieg' }}</h1>
+    {% include "partials/errors.html" %}
+    <form method="post" class="stack">
+      {% include "partials/csrf.html" %}
+      <label for="name">Nazwa</label>
+      <input id="name" name="name" value="{{ form.name }}" required maxlength="150">
+      <label for="description">Opis</label>
+      <textarea id="description" name="description" rows="4">{{ form.description }}</textarea>
+      <label for="duration_minutes">Czas trwania (minuty)</label>
+      <input id="duration_minutes" name="duration_minutes" type="number" min="30" max="240" step="30" value="{{ form.duration_minutes }}" required>
+      <label for="price">Cena (zł) <span class="optional">opcjonalnie</span></label>
+      <input id="price" name="price" inputmode="decimal" value="{{ form.price }}" placeholder="np. 150,00">
+      <label class="check">
+        <input type="checkbox" name="is_active" value="1" {% if form.is_active %}checked{% endif %}>
+        Aktywny
+      </label>
+      <div class="actions">
+        <button type="submit">Zapisz zabieg</button>
+        <a class="button button-ghost" href="{{ url_for('treatments.admin_list') }}">Wróć</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

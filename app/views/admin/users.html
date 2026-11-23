@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block title %}Konta{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Konta</h1>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Osoba</th>
+          <th>E-mail</th>
+          <th>Telefon</th>
+          <th>Rola</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone or '—' }}</td>
+            <td>{{ role_labels[user.role] }}</td>
+            <td><span class="badge {{ 'badge-on' if user.is_active else 'badge-off' }}">{{ 'Aktywne' if user.is_active else 'Nieaktywne' }}</span></td>
+            <td class="actions-cell">
+              <a href="{{ url_for('users.edit', user_id=user.id) }}">Edytuj</a>
+              <form method="post" action="{{ url_for('users.toggle', user_id=user.id) }}" class="inline-form">
+                {% include "partials/csrf.html" %}
+                <button type="submit" class="linkish">{{ 'Dezaktywuj' if user.is_active else 'Aktywuj' }}</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
